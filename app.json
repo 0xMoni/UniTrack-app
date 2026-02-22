@@ -1,0 +1,42 @@
+{
+  "expo": {
+    "name": "UniTrack",
+    "slug": "unitrack-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/logo.png",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": false,
+    "splash": {
+      "image": "./assets/logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0f172a"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.unitrack.mobile"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/logo.png",
+        "backgroundColor": "#0f172a"
+      },
+      "package": "com.unitrack.mobile"
+    },
+    "plugins": [
+      "react-native-quick-crypto",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "deploymentTarget": "15.1"
+          },
+          "android": {
+            "minSdkVersion": 24
+          }
+        }
+      ],
+      "expo-image-picker"
+    ]
+  }
+}

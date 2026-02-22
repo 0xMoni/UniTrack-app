@@ -1,0 +1,38 @@
+{
+  "name": "unitrack-mobile",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "web": "expo start --web"
+  },
+  "dependencies": {
+    "@expo/vector-icons": "^15.0.3",
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "@types/base-64": "^1.0.2",
+    "base-64": "^1.0.0",
+    "expo": "~54.0.33",
+    "expo-blur": "~15.0.8",
+    "expo-build-properties": "~1.0.10",
+    "expo-dev-client": "~6.0.20",
+    "expo-file-system": "~19.0.21",
+    "expo-image-picker": "~17.0.10",
+    "expo-status-bar": "~3.0.9",
+    "firebase": "^12.9.0",
+    "react": "19.1.0",
+    "react-native": "0.81.5",
+    "react-native-nitro-modules": "^0.33.9",
+    "react-native-quick-base64": "^2.2.2",
+    "react-native-quick-crypto": "^1.0.13",
+    "react-native-razorpay": "^2.3.1",
+    "react-native-safe-area-context": "~5.6.0"
+  },
+  "devDependencies": {
+    "@types/react": "~19.1.0",
+    "babel-preset-expo": "^54.0.10",
+    "typescript": "~5.9.2"
+  },
+  "private": true
+}
