@@ -33,7 +33,7 @@ export default function OverallStatsCard({
     const totalAttended = activeSubjects.reduce((sum, s) => sum + s.attended, 0);
     const totalClasses = activeSubjects.reduce((sum, s) => sum + s.total, 0);
     const overallPercentage =
-      totalClasses > 0 ? Math.round((totalAttended / totalClasses) * 100) : 0;
+      totalClasses > 0 ? parseFloat(((totalAttended / totalClasses) * 100).toFixed(1)) : 0;
 
     let totalBunkable = 0;
     let totalNeeded = 0;
@@ -61,16 +61,16 @@ export default function OverallStatsCard({
     // Overall projection: assume next full day with totalActiveSubjects classes
     const afterAttendAll =
       totalClasses + totalActiveSubjects > 0
-        ? Math.round(
-            ((totalAttended + totalActiveSubjects) /
+        ? parseFloat(
+            (((totalAttended + totalActiveSubjects) /
               (totalClasses + totalActiveSubjects)) *
-              100
+              100).toFixed(1)
           )
         : 0;
     const afterSkipAll =
       totalClasses + totalActiveSubjects > 0
-        ? Math.round(
-            (totalAttended / (totalClasses + totalActiveSubjects)) * 100
+        ? parseFloat(
+            ((totalAttended / (totalClasses + totalActiveSubjects)) * 100).toFixed(1)
           )
         : 0;
 

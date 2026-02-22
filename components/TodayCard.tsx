@@ -217,7 +217,7 @@ export default function TodayCard({
               <View style={styles.subjectRight}>
                 <Text style={[styles.percentage, { color: percentColor }]}>
                   {subject.total > 0
-                    ? `${Math.round(subject.percentage)}%`
+                    ? `${parseFloat(subject.percentage.toFixed(1))}%`
                     : '—'}
                 </Text>
                 <View

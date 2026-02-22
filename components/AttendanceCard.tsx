@@ -84,9 +84,9 @@ export default function AttendanceCard({
 
   // Next class projections
   const attendNext =
-    total > 0 ? Math.round(((attended + 1) / (total + 1)) * 100) : 100;
+    total > 0 ? parseFloat((((attended + 1) / (total + 1)) * 100).toFixed(1)) : 100;
   const skipNext =
-    total > 0 ? Math.round((attended / (total + 1)) * 100) : 0;
+    total > 0 ? parseFloat(((attended / (total + 1)) * 100).toFixed(1)) : 0;
 
   // Status message
   function getStatusMessage(): string {
@@ -181,7 +181,7 @@ export default function AttendanceCard({
             ) : null}
           </View>
           <Text style={[styles.percentage, { color: statusColor }]}>
-            {total > 0 ? `${Math.round(percentage)}%` : '--'}
+            {total > 0 ? `${parseFloat(percentage.toFixed(1))}%` : '--'}
           </Text>
         </View>
 
