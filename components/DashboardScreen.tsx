@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, RefreshControl, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeContext } from '../contexts/ThemeContext';
 import StudentInfoCard from './StudentInfoCard';
@@ -26,6 +26,8 @@ interface DashboardScreenProps {
   onTimetableSetupOpen: () => void;
   onUpgradeModalOpen: () => void;
   onSubjectThresholdChange: (subjectKey: string, value: number | null) => void;
+  onRefresh: () => Promise<void>;
+  isRefreshing: boolean;
 }
 
 export default function DashboardScreen({
@@ -41,6 +43,8 @@ export default function DashboardScreen({
   onTimetableSetupOpen,
   onUpgradeModalOpen,
   onSubjectThresholdChange,
+  onRefresh,
+  isRefreshing,
 }: DashboardScreenProps) {
   const { dark, colors } = useThemeContext();
 
@@ -77,6 +81,15 @@ export default function DashboardScreen({
       style={[styles.container, { backgroundColor: colors.background }]}
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl
+          refreshing={isRefreshing}
+          onRefresh={onRefresh}
+          tintColor={dark ? '#a5b4fc' : '#6366f1'}
+          colors={['#6366f1']}
+          progressBackgroundColor={dark ? '#1e293b' : '#ffffff'}
+        />
+      }
     >
       {/* Student Info */}
       <StudentInfoCard

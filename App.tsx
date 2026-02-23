@@ -45,6 +45,7 @@ function AppContent() {
   const [showTimetableSetup, setShowTimetableSetup] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [isAutoRefreshing, setIsAutoRefreshing] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const autoRefreshTriggered = useRef(false);
 
   // Premium state
@@ -220,6 +221,39 @@ function AppContent() {
     }
   }, [user, attendanceData, premiumStatus.canRefresh, premiumStatus.isPremium, threshold, refreshCount, refreshCountResetMonth]);
 
+  // ── Pull-to-refresh handler ──
+  const handlePullRefresh = useCallback(async () => {
+    if (!user || !attendanceData) return;
+
+    if (!premiumStatus.canRefresh) {
+      setShowUpgradeModal(true);
+      return;
+    }
+
+    setIsRefreshing(true);
+    try {
+      const creds = await loadErpCredentials(user.uid);
+      if (!creds) return;
+
+      const result = await fetchAttendanceFromApi(creds.erpUrl, creds.username, creds.password, threshold);
+
+      if (result.success && result.data) {
+        setAttendanceData(result.data);
+
+        if (!premiumStatus.isPremium) {
+          const currentMonth = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
+          const updated = await incrementRefreshCount(user.uid, currentMonth, refreshCount, refreshCountResetMonth);
+          setRefreshCount(updated.refreshCount);
+          setRefreshCountResetMonth(updated.refreshCountResetMonth);
+        }
+      }
+    } catch {
+      setError('Refresh failed — check your connection');
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [user, attendanceData, premiumStatus.canRefresh, premiumStatus.isPremium, threshold, refreshCount, refreshCountResetMonth]);
+
   // ── Trigger auto-refresh once after initialization if data is stale ──
   useEffect(() => {
     if (!isInitialized || !attendanceData || autoRefreshTriggered.current) return;
@@ -344,6 +378,8 @@ function AppContent() {
           onTimetableSetupOpen={() => setShowTimetableSetup(true)}
           onUpgradeModalOpen={() => setShowUpgradeModal(true)}
           onSubjectThresholdChange={handleSubjectThresholdChange}
+          onRefresh={handlePullRefresh}
+          isRefreshing={isRefreshing}
         />
       </SafeAreaView>
 
