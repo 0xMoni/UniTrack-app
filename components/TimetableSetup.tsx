@@ -8,6 +8,7 @@ import {
   Image,
   ActivityIndicator,
   StyleSheet,
+  SafeAreaView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
@@ -153,7 +154,7 @@ export default function TimetableSetup({
       animationType="slide"
       onRequestClose={onClose}
     >
-      <View
+      <SafeAreaView
         style={[
           styles.modal,
           { backgroundColor: colors.background },
@@ -500,7 +501,7 @@ export default function TimetableSetup({
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+        </SafeAreaView>
     </Modal>
   );
 }
