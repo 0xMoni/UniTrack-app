@@ -98,9 +98,13 @@ export default function TimetableSetup({
         encoding: 'base64',
       });
 
+      // Detect MIME type from URI or asset
+      const ext = asset.uri.split('.').pop()?.toLowerCase();
+      const mimeType = ext === 'png' ? 'image/png' : ext === 'webp' ? 'image/webp' : 'image/jpeg';
+
       const response = await parseTimetableFromApi(
         base64,
-        'image/jpeg',
+        mimeType,
         subjectCodes,
       );
 
@@ -146,22 +150,23 @@ export default function TimetableSetup({
   return (
     <Modal
       visible={isOpen}
-      transparent
-      animationType="fade"
+      animationType="slide"
       onRequestClose={onClose}
     >
-      <View style={styles.overlay}>
-        <View
-          style={[
-            styles.modal,
-            { backgroundColor: colors.background },
-          ]}
-        >
-          {/* Header */}
-          <View style={[styles.header, { borderBottomColor: colors.divider }]}>
-            <Text style={[styles.headerTitle, { color: colors.text }]}>
-              Weekly Timetable
-            </Text>
+      <View
+        style={[
+          styles.modal,
+          { backgroundColor: colors.background },
+        ]}
+      >
+        {/* Header */}
+        <View style={[styles.header, { borderBottomColor: colors.divider }]}>
+          <TouchableOpacity onPress={onClose} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+            <Ionicons name="close" size={24} color={colors.text} />
+          </TouchableOpacity>
+          <Text style={[styles.headerTitle, { color: colors.text, flex: 1, marginLeft: 12 }]}>
+            Weekly Timetable
+          </Text>
             <TouchableOpacity
               onPress={handleToggleMode}
               style={[
@@ -496,24 +501,13 @@ export default function TimetableSetup({
             </View>
           </View>
         </View>
-      </View>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-  },
   modal: {
-    width: '100%',
-    maxHeight: '85%',
-    borderRadius: 20,
-    overflow: 'hidden',
+    flex: 1,
   },
 
   /* Header */
