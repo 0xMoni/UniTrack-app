@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { SafeAreaView, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ThemeProvider, useThemeContext } from './contexts/ThemeContext';
@@ -357,7 +357,6 @@ function AppContent() {
   return (
     <View style={[styles.flex, { backgroundColor: colors.background }]}>
       <StatusBar style={colors.statusBarStyle} />
-      <SafeAreaView style={styles.flex}>
         <Header
           premiumStatus={premiumStatus}
           onUpgradePress={() => setShowUpgradeModal(true)}
@@ -381,7 +380,6 @@ function AppContent() {
           onRefresh={handlePullRefresh}
           isRefreshing={isRefreshing}
         />
-      </SafeAreaView>
 
       {/* Modals */}
       <ThresholdModal
