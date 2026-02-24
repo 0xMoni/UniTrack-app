@@ -147,22 +147,11 @@ export default function AttendanceCard({
       style={[
         styles.card,
         {
-          backgroundColor: getStatusBgRgba(status, 0.05, dark),
+          backgroundColor: getStatusBgRgba(status, 0.12, dark),
           borderColor: getStatusBorderColor(status, dark),
         },
       ]}
     >
-      {/* Background progress fill */}
-      <Animated.View
-        style={[
-          styles.backgroundFill,
-          {
-            backgroundColor: statusColor,
-            width: fillWidth,
-          },
-        ]}
-      />
-
       {/* Content */}
       <View style={styles.content}>
         {/* Header row */}
@@ -465,13 +454,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     overflow: 'hidden',
     position: 'relative',
-  },
-  backgroundFill: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    bottom: 0,
-    opacity: 0.1,
   },
   content: {
     position: 'relative',
