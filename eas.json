@@ -9,6 +9,9 @@
         "buildType": "apk",
         "credentialsSource": "local"
       },
+      "ios": {
+        "credentialsSource": "remote"
+      },
       "distribution": "internal"
     },
     "simulator": {
