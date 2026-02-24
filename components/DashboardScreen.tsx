@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, ScrollView, RefreshControl, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeContext } from '../contexts/ThemeContext';
@@ -68,13 +68,9 @@ export default function DashboardScreen({
 
   const customCount = Object.keys(subjectThresholds).length;
 
-  // Timetable: compute today's subjects
+  // Timetable
   const hasTimetable = Object.values(timetable).some(codes => codes.length > 0);
-  const jsDay = new Date().getDay();
-  const timetableDayIndex = jsDay === 0 ? -1 : jsDay - 1;
-  const todayCodes = timetableDayIndex >= 0 ? (timetable[timetableDayIndex] || []) : [];
-  const subjectMap = new Map(attendanceData.subjects.map(s => [getSubjectKey(s), s]));
-  const todaySubjects = todayCodes.map(code => subjectMap.get(code)).filter((s): s is Subject => !!s);
+  const subjectMap = useMemo(() => new Map(attendanceData.subjects.map(s => [getSubjectKey(s), s])), [attendanceData.subjects]);
 
   return (
     <ScrollView
@@ -109,7 +105,8 @@ export default function DashboardScreen({
       {hasTimetable ? (
         <PremiumGate isPremium={premiumStatus.isPaidPremium} onUpgradePress={onUpgradeModalOpen}>
           <TodayCard
-            subjects={todaySubjects}
+            timetable={timetable}
+            subjectMap={subjectMap}
             globalThreshold={threshold}
             subjectThresholds={subjectThresholds}
           />

@@ -1,8 +1,8 @@
-import React, { useMemo } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeContext } from '../contexts/ThemeContext';
-import { Subject } from '../lib/types';
+import { Subject, Timetable } from '../lib/types';
 import {
   calculateClassesToBunk,
   calculateStatus,
@@ -12,7 +12,8 @@ import {
 } from '../lib/utils';
 
 interface TodayCardProps {
-  subjects: Subject[];
+  timetable: Timetable;
+  subjectMap: Map<string, Subject>;
   globalThreshold: number;
   subjectThresholds: Record<string, number>;
 }
@@ -110,15 +111,27 @@ function getVerdict(subject: Subject, threshold: number): Verdict {
   return 'risky';
 }
 
+const TAB_LABELS = ['Today', 'Tomorrow', 'Day After'];
+
 export default function TodayCard({
-  subjects,
+  timetable,
+  subjectMap,
   globalThreshold,
   subjectThresholds,
 }: TodayCardProps) {
   const { dark, colors } = useThemeContext();
   const VERDICT_STYLES = dark ? VERDICT_STYLES_DARK : VERDICT_STYLES_LIGHT;
+  const [selectedDay, setSelectedDay] = useState(0);
 
-  const dayName = DAY_NAMES[new Date().getDay()];
+  const todayJsDay = new Date().getDay();
+  const targetJsDay = (todayJsDay + selectedDay) % 7;
+  const dayName = DAY_NAMES[targetJsDay];
+  const timetableDayIndex = targetJsDay === 0 ? -1 : targetJsDay - 1;
+
+  const subjects = useMemo(() => {
+    const codes = timetableDayIndex >= 0 ? (timetable[timetableDayIndex] || []) : [];
+    return codes.map(code => subjectMap.get(code)).filter((s): s is Subject => !!s);
+  }, [timetable, subjectMap, timetableDayIndex]);
 
   const verdicts = useMemo(() => {
     return subjects.map((subject) => {
@@ -141,9 +154,57 @@ export default function TodayCard({
     borderColor: colors.cardBorder,
   };
 
+  const headerLabel = selectedDay === 0 ? `Today — ${dayName}` : `${TAB_LABELS[selectedDay]} — ${dayName}`;
+
+  const dayTabs = (
+    <View style={styles.tabRow}>
+      {TAB_LABELS.map((label, i) => {
+        const active = selectedDay === i;
+        return (
+          <TouchableOpacity
+            key={label}
+            onPress={() => setSelectedDay(i)}
+            style={[
+              styles.tab,
+              {
+                backgroundColor: active
+                  ? colors.accent
+                  : dark ? 'rgba(148, 163, 184, 0.12)' : 'rgba(148, 163, 184, 0.15)',
+              },
+            ]}
+            activeOpacity={0.7}
+          >
+            <Text
+              style={[
+                styles.tabText,
+                {
+                  color: active ? '#ffffff' : colors.textSecondary,
+                  fontWeight: active ? '600' : '500',
+                },
+              ]}
+            >
+              {label}
+            </Text>
+          </TouchableOpacity>
+        );
+      })}
+    </View>
+  );
+
+  const noClassesMessage = selectedDay === 0
+    ? 'No classes today — enjoy your free time!'
+    : `No classes on ${dayName}`;
+
+  const summaryMessage = skippableCount > 0
+    ? `You can safely skip ${skippableCount} of ${subjects.length} ${subjects.length === 1 ? 'class' : 'classes'}`
+    : selectedDay === 0
+      ? 'Better attend all classes today'
+      : `Better attend all classes on ${dayName}`;
+
   if (subjects.length === 0) {
     return (
       <View style={[styles.card, cardBase]}>
+        {dayTabs}
         <View style={styles.emptyContainer}>
           <View style={[styles.emptyIconContainer, { backgroundColor: dark ? 'rgba(148, 163, 184, 0.15)' : 'rgba(148, 163, 184, 0.1)' }]}>
             <Ionicons name="remove-outline" size={20} color={colors.textTertiary} />
@@ -152,7 +213,7 @@ export default function TodayCard({
             {dayName}
           </Text>
           <Text style={[styles.emptyMessage, { color: colors.textSecondary }]}>
-            No classes today — enjoy your free time!
+            {noClassesMessage}
           </Text>
         </View>
       </View>
@@ -161,6 +222,8 @@ export default function TodayCard({
 
   return (
     <View style={[styles.card, cardBase]}>
+      {dayTabs}
+
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
@@ -168,7 +231,7 @@ export default function TodayCard({
             <Ionicons name="calendar-outline" size={16} color={colors.accent} />
           </View>
           <Text style={[styles.headerTitle, { color: colors.text }]}>
-            Today — {dayName}
+            {headerLabel}
           </Text>
         </View>
         <Text style={[styles.headerCount, { color: colors.textSecondary }]}>
@@ -255,11 +318,7 @@ export default function TodayCard({
         ]}
       >
         <Text style={[styles.summaryText, { color: colors.textSecondary }]}>
-          {skippableCount > 0
-            ? `You can safely skip ${skippableCount} of ${subjects.length} ${
-                subjects.length === 1 ? 'class' : 'classes'
-              } today`
-            : 'Better attend all classes today'}
+          {summaryMessage}
         </Text>
       </View>
     </View>
@@ -271,6 +330,21 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
     overflow: 'hidden',
+  },
+  tabRow: {
+    flexDirection: 'row',
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingTop: 14,
+    paddingBottom: 4,
+  },
+  tab: {
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+  tabText: {
+    fontSize: 12,
   },
   emptyContainer: {
     alignItems: 'center',
