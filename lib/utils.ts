@@ -88,13 +88,6 @@ export function formatDate(dateString: string): string {
   });
 }
 
-export const STORAGE_KEY = 'unitrack_data';
-export const CREDENTIALS_KEY = 'unitrack_credentials';
-export const THRESHOLD_KEY = 'unitrack_threshold';
-export const SUBJECT_THRESHOLDS_KEY = 'unitrack_subject_thresholds';
-export const ERP_URL_KEY = 'unitrack_erp_url';
-export const TIMETABLE_KEY = 'unitrack_timetable';
-
 export function getSubjectKey(subject: Subject): string {
   return subject.code || subject.name;
 }

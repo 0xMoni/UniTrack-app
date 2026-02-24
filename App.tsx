@@ -173,8 +173,8 @@ function AppContent() {
 
         try {
           await saveErpCredentials(user.uid, erpUrl, username, password);
-        } catch (saveErr) {
-          console.error('Failed to save ERP credentials:', saveErr);
+        } catch {
+          // Credential save failed silently — non-blocking
         }
 
         if (!isFirstFetch && !premiumStatus.isPremium) {
