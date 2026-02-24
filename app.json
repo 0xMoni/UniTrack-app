@@ -46,11 +46,11 @@
       ],
       "expo-image-picker"
     ],
+    "owner": "spring07",
     "extra": {
       "eas": {
-        "projectId": "ff35f6d4-00f4-4a03-9baa-254e92ba9b26"
+        "projectId": "69130a6b-4ebc-43cf-9d9f-c13130b43267"
       }
-    },
-    "owner": "moniii"
+    }
   }
 }
