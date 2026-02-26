@@ -97,9 +97,9 @@ export default function VacationPlanner({
     return getVacationDays(startDate, endDate, holidays);
   }, [startDate, endDate, holidays]);
 
-  // Get weekdays in range (for holiday toggle list)
-  const weekdaysInRange = useMemo(() => {
-    return vacationDays.filter(d => !d.isSunday);
+  // All days in range for holiday toggle list (including Sundays)
+  const daysInRange = useMemo(() => {
+    return vacationDays;
   }, [vacationDays]);
 
   // Calculate impact
@@ -201,27 +201,41 @@ export default function VacationPlanner({
       )}
 
       {/* Holiday markers */}
-      {startDate && endDate && weekdaysInRange.length > 0 && (
+      {startDate && endDate && daysInRange.length > 0 && (
         <View style={styles.holidaySection}>
           <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>
             Mark holidays
           </Text>
           <View style={styles.holidayList}>
-            {weekdaysInRange.map(day => {
+            {daysInRange.map(day => {
               const isHoliday = holidays.has(day.dateStr);
               return (
-                <View key={day.dateStr} style={styles.holidayRow}>
-                  <Text style={[styles.holidayDate, { color: colors.text }]}>
-                    {DAY_NAMES_SHORT[day.jsDay]} {day.date.getDate()}
-                  </Text>
+                <View key={day.dateStr} style={[styles.holidayRow, day.isSunday && { opacity: 0.5 }]}>
+                  <View style={styles.holidayLabelRow}>
+                    <Text style={[styles.holidayDate, { color: day.isSunday ? colors.textTertiary : colors.text }]}>
+                      {DAY_NAMES_SHORT[day.jsDay]} {day.date.getDate()}
+                    </Text>
+                    {day.isSunday && (
+                      <Text style={[styles.autoExcludedLabel, { color: colors.textTertiary }]}>
+                        Auto-excluded
+                      </Text>
+                    )}
+                  </View>
                   <Switch
-                    value={isHoliday}
-                    onValueChange={() => handleToggleHoliday(day.dateStr)}
+                    value={day.isSunday || isHoliday}
+                    onValueChange={() => { if (!day.isSunday) handleToggleHoliday(day.dateStr); }}
+                    disabled={day.isSunday}
                     trackColor={{
                       false: dark ? '#475569' : '#cbd5e1',
-                      true: dark ? 'rgba(165, 180, 252, 0.5)' : 'rgba(99, 102, 241, 0.4)',
+                      true: day.isSunday
+                        ? (dark ? 'rgba(148, 163, 184, 0.3)' : 'rgba(148, 163, 184, 0.25)')
+                        : (dark ? 'rgba(165, 180, 252, 0.5)' : 'rgba(99, 102, 241, 0.4)'),
                     }}
-                    thumbColor={isHoliday ? colors.accent : (dark ? '#94a3b8' : '#f1f5f9')}
+                    thumbColor={
+                      day.isSunday
+                        ? (dark ? '#64748b' : '#94a3b8')
+                        : isHoliday ? colors.accent : (dark ? '#94a3b8' : '#f1f5f9')
+                    }
                   />
                 </View>
               );
@@ -466,9 +480,19 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     paddingHorizontal: 4,
   },
+  holidayLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    flex: 1,
+  },
   holidayDate: {
     fontSize: 13,
     fontWeight: '500',
+  },
+  autoExcludedLabel: {
+    fontSize: 11,
+    fontStyle: 'italic',
   },
   impactSection: {
     marginTop: 16,

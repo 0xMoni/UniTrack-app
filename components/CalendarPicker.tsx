@@ -131,7 +131,7 @@ export default function CalendarPicker({
 
           const isSun = date.getDay() === 0;
           const isPast = date < minDate;
-          const disabled = isSun || isPast;
+          const disabled = isPast;
 
           const dateStr = formatDateStr(date);
           const isHoliday = holidays.has(dateStr);
