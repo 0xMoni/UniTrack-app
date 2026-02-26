@@ -29,6 +29,27 @@ const DAY_NAMES = [
   'Saturday',
 ];
 
+const SUNDAY_MESSAGES = [
+  'Recharge mode activated. You earned it.',
+  'No attendance stress today — just vibes.',
+  'Even your attendance tracker needs a day off.',
+  'Sunday: the only day your percentage can\'t drop.',
+  'Go touch some grass. Your attendance is safe.',
+  'Plot twist: no classes today.',
+  'Your future self thanks you for resting today.',
+  'Zero lectures, zero worries, full battery.',
+  'The only thing you need to attend today is brunch.',
+  'Take it easy — Monday\'s problem is Monday\'s.',
+  'No alarms, no lectures, no regrets.',
+  'Today\'s attendance goal: 100% chill.',
+];
+
+function getSundayMessage(): string {
+  const now = new Date();
+  const seed = now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate();
+  return SUNDAY_MESSAGES[seed % SUNDAY_MESSAGES.length];
+}
+
 type Verdict = 'skip' | 'risky' | 'attend' | 'no_data';
 
 interface VerdictStyle {
@@ -201,6 +222,26 @@ export default function TodayCard({
       ? 'Better attend all classes today'
       : `Better attend all classes on ${dayName}`;
 
+  // Sunday fun message — only on "Today" tab when today is actually Sunday
+  if (targetJsDay === 0 && selectedDay === 0) {
+    return (
+      <View style={[styles.card, cardBase]}>
+        {dayTabs}
+        <View style={styles.emptyContainer}>
+          <View style={[styles.sundayIconContainer, { backgroundColor: dark ? 'rgba(52, 211, 153, 0.15)' : 'rgba(16, 185, 129, 0.1)' }]}>
+            <Ionicons name="sunny" size={22} color={dark ? '#34d399' : '#10b981'} />
+          </View>
+          <Text style={[styles.emptyDayName, { color: colors.text }]}>
+            Sunday
+          </Text>
+          <Text style={[styles.sundayMessage, { color: colors.textSecondary }]}>
+            {getSundayMessage()}
+          </Text>
+        </View>
+      </View>
+    );
+  }
+
   if (subjects.length === 0) {
     return (
       <View style={[styles.card, cardBase]}>
@@ -367,6 +408,21 @@ const styles = StyleSheet.create({
   emptyMessage: {
     fontSize: 13,
     textAlign: 'center',
+  },
+  sundayIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 4,
+  },
+  sundayMessage: {
+    fontSize: 13,
+    textAlign: 'center',
+    fontStyle: 'italic',
+    lineHeight: 18,
+    paddingHorizontal: 12,
   },
   header: {
     flexDirection: 'row',

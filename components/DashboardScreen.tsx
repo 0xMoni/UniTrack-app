@@ -8,6 +8,7 @@ import StatusFilter from './StatusFilter';
 import AttendanceCard from './AttendanceCard';
 import TodayCard from './TodayCard';
 import WeekOverview from './WeekOverview';
+import VacationPlanner from './VacationPlanner';
 import PremiumGate from './PremiumGate';
 import { AttendanceData, StatusFilter as StatusFilterType, Timetable, Subject } from '../lib/types';
 import { calculateStatus, getSubjectKey, getEffectiveThreshold } from '../lib/utils';
@@ -114,6 +115,14 @@ export default function DashboardScreen({
             <WeekOverview
               timetable={timetable}
               subjects={attendanceData.subjects}
+              globalThreshold={threshold}
+              subjectThresholds={subjectThresholds}
+            />
+          </View>
+          <View style={{ marginTop: 12 }}>
+            <VacationPlanner
+              timetable={timetable}
+              subjectMap={subjectMap}
               globalThreshold={threshold}
               subjectThresholds={subjectThresholds}
             />
