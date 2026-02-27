@@ -38,13 +38,6 @@ function formatShortDate(d: Date): string {
   return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
 }
 
-function formatDateStr(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
-}
-
 const DAY_NAMES_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export default function VacationPlanner({

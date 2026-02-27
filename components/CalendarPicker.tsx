@@ -145,6 +145,8 @@ export default function CalendarPicker({
 
           if (disabled) {
             textColor = colors.textTertiary;
+          } else if (isSun) {
+            textColor = colors.textTertiary;
           }
 
           if (inRange && !isStart && !isEnd) {
