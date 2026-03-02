@@ -85,4 +85,3 @@ UniTrack is a React Native/Expo mobile app that helps university students track 
 - `npx expo run:android` — local Android build
 - `eas build --platform android --profile preview` — EAS APK build
 - Separate Next.js web app exists at `unitrack-web/` (deployed on Vercel)
-- GitHub: `0xMoni/UniTrack-app`
