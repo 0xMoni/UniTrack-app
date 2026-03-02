@@ -4,9 +4,6 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  LayoutAnimation,
-  Platform,
-  UIManager,
   Switch,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -19,13 +16,6 @@ import {
   VacationWindow,
 } from '../lib/vacationPlanner';
 import CalendarPicker from './CalendarPicker';
-
-if (
-  Platform.OS === 'android' &&
-  UIManager.setLayoutAnimationEnabledExperimental
-) {
-  UIManager.setLayoutAnimationEnabledExperimental(true);
-}
 
 interface VacationPlannerProps {
   timetable: Timetable;
@@ -61,7 +51,6 @@ export default function VacationPlanner({
   }, []);
 
   const handleSelectDate = useCallback((s: Date | null, e: Date | null) => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setStartDate(s);
     setEndDate(e);
     setHolidays(new Set());
@@ -70,7 +59,6 @@ export default function VacationPlanner({
   }, []);
 
   const handleToggleHoliday = useCallback((dateStr: string) => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setHolidays(prev => {
       const next = new Set(prev);
       if (next.has(dateStr)) next.delete(dateStr);
@@ -80,20 +68,20 @@ export default function VacationPlanner({
   }, []);
 
   const toggleCalendar = useCallback(() => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setShowCalendar(prev => !prev);
   }, []);
 
-  // Get vacation days for selected range
+  // Days in range — stable, only changes when date range changes (not holidays)
+  const daysInRange = useMemo(() => {
+    if (!startDate || !endDate) return [];
+    return getVacationDays(startDate, endDate, new Set());
+  }, [startDate, endDate]);
+
+  // Vacation days with holiday awareness — for impact calculation only
   const vacationDays = useMemo(() => {
     if (!startDate || !endDate) return [];
     return getVacationDays(startDate, endDate, holidays);
   }, [startDate, endDate, holidays]);
-
-  // All days in range for holiday toggle list (including Sundays)
-  const daysInRange = useMemo(() => {
-    return vacationDays;
-  }, [vacationDays]);
 
   // Calculate impact
   const impactResult = useMemo(() => {
@@ -108,7 +96,6 @@ export default function VacationPlanner({
     : 0;
 
   const handleFindBest = useCallback(() => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     const windows = findBestVacationWindows(
       timetable, subjectMap, globalThreshold, subjectThresholds,
     );
@@ -117,7 +104,6 @@ export default function VacationPlanner({
   }, [timetable, subjectMap, globalThreshold, subjectThresholds]);
 
   const handleApplySuggestion = useCallback((w: VacationWindow) => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setStartDate(w.startDate);
     setEndDate(w.endDate);
     setHolidays(new Set());
