@@ -1,6 +1,18 @@
 import { Subject, Timetable } from './types';
-import { SubjectImpact } from './skipPlanner';
 import { calculateClassesToBunk, getEffectiveThreshold } from './utils';
+
+export interface SubjectImpact {
+  code: string;
+  name: string;
+  classCount: number;
+  currentPct: number;
+  projectedPct: number;
+  drop: number;
+  currentBunkable: number;
+  projectedBunkable: number;
+  breachesThreshold: boolean;
+  isNoData: boolean;
+}
 
 export interface VacationDay {
   date: Date;
