@@ -14,6 +14,7 @@ import {
   savePayment,
   PaymentRecord,
 } from './lib/firestore';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { fetchAttendanceFromApi } from './lib/api';
 import { AttendanceData, StatusFilter as StatusFilterType, Timetable } from './lib/types';
 import LoadingScreen from './components/LoadingScreen';
@@ -82,22 +83,36 @@ function AppContent() {
 
     let cancelled = false;
 
+    const storageKey = `@premiumUntil:${user.uid}`;
+
     (async () => {
       try {
         const data = await loadUserData(user.uid);
         if (cancelled) return;
 
         if (data.attendance) setAttendanceData(data.attendance);
-        if (data.threshold) setThreshold(data.threshold);
+        if (data.threshold != null) setThreshold(data.threshold);
         if (data.subjectThresholds) setSubjectThresholds(data.subjectThresholds);
         if (data.timetable) setTimetable(data.timetable);
         if (data.erpUrl) setSavedErpUrl(data.erpUrl);
-        if (data.premiumUntil) setPremiumUntil(data.premiumUntil);
-        if (data.trialEndsAt) setTrialEndsAt(data.trialEndsAt);
-        if (data.refreshCount) setRefreshCount(data.refreshCount);
+        if (data.premiumUntil != null) {
+          setPremiumUntil(data.premiumUntil);
+          // Sync Firestore value to AsyncStorage backup
+          AsyncStorage.setItem(storageKey, data.premiumUntil).catch(() => {});
+        }
+        if (data.trialEndsAt != null) setTrialEndsAt(data.trialEndsAt);
+        if (data.refreshCount != null) setRefreshCount(data.refreshCount);
         if (data.refreshCountResetMonth) setRefreshCountResetMonth(data.refreshCountResetMonth);
       } catch {
-        // Firestore load failed — user will see empty state
+        // Firestore load failed — try to recover premiumUntil from AsyncStorage
+        if (!cancelled) {
+          try {
+            const cached = await AsyncStorage.getItem(storageKey);
+            if (cached) setPremiumUntil(cached);
+          } catch {
+            // AsyncStorage also failed — user will see free state
+          }
+        }
       }
 
       if (!cancelled) setIsInitialized(true);
@@ -269,6 +284,9 @@ function AppContent() {
 
   // ── Logout ──
   const handleLogout = async () => {
+    if (user) {
+      AsyncStorage.removeItem(`@premiumUntil:${user.uid}`).catch(() => {});
+    }
     setAttendanceData(null);
     setSavedUsername('');
     setSavedErpUrl('');
@@ -291,8 +309,23 @@ function AppContent() {
 
   const handlePaymentSuccess = async (newPremiumUntil: string, payment: PaymentRecord) => {
     setPremiumUntil(newPremiumUntil);
-    if (user) {
+    if (!user) return;
+
+    // Write AsyncStorage backup immediately
+    const storageKey = `@premiumUntil:${user.uid}`;
+    AsyncStorage.setItem(storageKey, newPremiumUntil).catch(() => {});
+
+    // Try saving to Firestore with 1 retry
+    try {
       await savePayment(user.uid, newPremiumUntil, payment);
+    } catch {
+      // Retry once after 1.5s
+      await new Promise(r => setTimeout(r, 1500));
+      try {
+        await savePayment(user.uid, newPremiumUntil, payment);
+      } catch {
+        setError('Payment saved locally but sync failed — it will retry on next launch');
+      }
     }
   };
 

@@ -24,7 +24,7 @@ interface UpgradeModalProps {
   uid: string;
   email: string;
   currentPremiumUntil: string | null;
-  onPaymentSuccess: (premiumUntil: string, payment: PaymentRecord) => void;
+  onPaymentSuccess: (premiumUntil: string, payment: PaymentRecord) => Promise<void>;
 }
 
 interface FeatureRow {
@@ -95,8 +95,8 @@ export default function UpgradeModal({
         return;
       }
 
-      // Step 4: Success
-      onPaymentSuccess(
+      // Step 4: Persist payment before closing modal
+      await onPaymentSuccess(
         verifyResult.premiumUntil!,
         verifyResult.payment as PaymentRecord,
       );
