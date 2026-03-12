@@ -48,6 +48,11 @@ function AppContent() {
   const [isAutoRefreshing, setIsAutoRefreshing] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const autoRefreshTriggered = useRef(false);
+  const dataLoadedFromFirestore = useRef(false);
+  const attendanceLoaded = useRef(false);
+  const thresholdLoaded = useRef(false);
+  const subjectThresholdsLoaded = useRef(false);
+  const timetableLoaded = useRef(false);
 
   // Premium state
   const [premiumUntil, setPremiumUntil] = useState<string | null>(null);
@@ -75,6 +80,11 @@ function AppContent() {
     setIsInitialized(false);
     setIsAutoRefreshing(false);
     autoRefreshTriggered.current = false;
+    dataLoadedFromFirestore.current = false;
+    attendanceLoaded.current = false;
+    thresholdLoaded.current = false;
+    subjectThresholdsLoaded.current = false;
+    timetableLoaded.current = false;
     setIsLoading(false);
     setError(null);
     setAuthError(null);
@@ -103,6 +113,15 @@ function AppContent() {
         if (data.trialEndsAt != null) setTrialEndsAt(data.trialEndsAt);
         if (data.refreshCount != null) setRefreshCount(data.refreshCount);
         if (data.refreshCountResetMonth) setRefreshCountResetMonth(data.refreshCountResetMonth);
+
+        // Pre-fill saved username from encrypted credentials
+        if (data.erpCredentials) {
+          loadErpCredentials(user.uid).then(creds => {
+            if (creds && !cancelled) setSavedUsername(creds.username);
+          }).catch(() => {});
+        }
+
+        dataLoadedFromFirestore.current = true;
       } catch {
         // Firestore load failed — try to recover premiumUntil from AsyncStorage
         if (!cancelled) {
@@ -121,30 +140,34 @@ function AppContent() {
     return () => { cancelled = true; };
   }, [user]);
 
-  // ── Save attendance to Firestore when it changes ──
+  // ── Save attendance to Firestore when it changes (skip initial load) ──
   useEffect(() => {
     if (!isInitialized || !user || !attendanceData) return;
+    if (!attendanceLoaded.current) { attendanceLoaded.current = true; return; }
     saveUserData(user.uid, {
       attendance: attendanceData,
       lastSynced: new Date().toISOString(),
     });
   }, [attendanceData, isInitialized, user]);
 
-  // ── Save threshold to Firestore when it changes ──
+  // ── Save threshold to Firestore when it changes (skip initial load) ──
   useEffect(() => {
     if (!isInitialized || !user) return;
+    if (!thresholdLoaded.current) { thresholdLoaded.current = true; return; }
     saveUserData(user.uid, { threshold });
   }, [threshold, isInitialized, user]);
 
-  // ── Save subject thresholds to Firestore when they change ──
+  // ── Save subject thresholds to Firestore when they change (skip initial load) ──
   useEffect(() => {
     if (!isInitialized || !user) return;
+    if (!subjectThresholdsLoaded.current) { subjectThresholdsLoaded.current = true; return; }
     saveUserData(user.uid, { subjectThresholds });
   }, [subjectThresholds, isInitialized, user]);
 
-  // ── Save timetable to Firestore when it changes ──
+  // ── Save timetable to Firestore when it changes (skip initial load) ──
   useEffect(() => {
     if (!isInitialized || !user) return;
+    if (!timetableLoaded.current) { timetableLoaded.current = true; return; }
     saveUserData(user.uid, { timetable });
   }, [timetable, isInitialized, user]);
 

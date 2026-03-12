@@ -30,7 +30,12 @@ async function deriveKey(password: string, salt: Uint8Array): Promise<CryptoKey>
 }
 
 function toBase64(buffer: ArrayBuffer): string {
-  return btoa64(String.fromCharCode(...new Uint8Array(buffer)));
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  for (let i = 0; i < bytes.length; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa64(binary);
 }
 
 function fromBase64(base64: string): Uint8Array {

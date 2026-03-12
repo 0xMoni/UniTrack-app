@@ -345,8 +345,7 @@ export default function LoginScreen(props: Props) {
           {/* Footer */}
           {mode === 'erp' && (
             <Text style={[styles.footer, { color: colors.textTertiary }]}>
-              Your credentials are sent directly to the ERP server and are never stored on our
-              servers.
+              Your credentials are encrypted and stored securely on your device. They are sent to our server only to fetch your attendance from the ERP.
             </Text>
           )}
         </ScrollView>

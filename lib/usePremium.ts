@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 
 const FREE_REFRESHES_PER_MONTH = 3;
 
@@ -21,6 +21,23 @@ export interface PremiumStatus {
 }
 
 export function usePremium({ premiumUntil, trialEndsAt, refreshCount, refreshCountResetMonth }: UsePremiumInput): PremiumStatus {
+  const [, setTick] = useState(0);
+
+  // Schedule a re-evaluation when premium or trial expires
+  useEffect(() => {
+    const now = Date.now();
+    const expiryTimes: number[] = [];
+    if (premiumUntil) expiryTimes.push(new Date(premiumUntil).getTime() - now);
+    if (trialEndsAt) expiryTimes.push(new Date(trialEndsAt).getTime() - now);
+
+    const remaining = expiryTimes.filter(t => t > 0);
+    if (remaining.length === 0) return;
+
+    const soonest = Math.min(...remaining);
+    const timer = setTimeout(() => setTick(t => t + 1), soonest + 1000);
+    return () => clearTimeout(timer);
+  }, [premiumUntil, trialEndsAt]);
+
   return useMemo(() => {
     const now = new Date();
     const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;

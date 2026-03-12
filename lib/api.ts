@@ -18,6 +18,10 @@ export async function fetchAttendanceFromApi(
       signal: controller.signal,
     });
     clearTimeout(timeout);
+    if (!response.ok) {
+      const data = await response.json().catch(() => null);
+      return { success: false, error: data?.error || `Server error (${response.status})` };
+    }
     return await response.json();
   } catch (err) {
     clearTimeout(timeout);
@@ -33,14 +37,27 @@ export async function parseTimetableFromApi(
   mimeType: string,
   subjectCodes: string[]
 ): Promise<{ success: boolean; timetable?: Record<number, string[]>; error?: string }> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 60_000);
+
   try {
     const response = await fetch(`${API_BASE_URL}/api/parse-timetable`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ image: imageBase64, mimeType, subjectCodes }),
+      signal: controller.signal,
     });
+    clearTimeout(timeout);
+    if (!response.ok) {
+      const data = await response.json().catch(() => null);
+      return { success: false, error: data?.error || `Server error (${response.status})` };
+    }
     return await response.json();
-  } catch {
+  } catch (err) {
+    clearTimeout(timeout);
+    if (err instanceof Error && err.name === 'AbortError') {
+      return { success: false, error: 'Request timed out — try a clearer image' };
+    }
     return { success: false, error: 'Network error — could not reach the server' };
   }
 }

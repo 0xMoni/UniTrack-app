@@ -138,6 +138,7 @@ export default function TimetableSetup({
 
   const handleSave = () => {
     onSave(draft);
+    onClose();
   };
 
   // Count total configured subjects across all days
