@@ -19,7 +19,10 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.unitrack.mobile"
+      "bundleIdentifier": "com.unitrack.mobile",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -46,10 +49,10 @@
       ],
       "expo-image-picker"
     ],
-    "owner": "monii07",
+    "owner": "dhruvvvv",
     "extra": {
       "eas": {
-        "projectId": "c3eadefd-08c5-4a31-a5a1-4e5fb1e57b99"
+        "projectId": "1a50c213-9abe-44ff-8327-ff8455cf66f1"
       }
     }
   }
