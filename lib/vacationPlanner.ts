@@ -77,7 +77,39 @@ export function getVacationDays(
 }
 
 /**
+ * Count classes per subject between two dates (exclusive of both boundaries)
+ * using the timetable. Used to estimate classes a student will attend
+ * before a vacation starts.
+ */
+function countClassesBetween(
+  fromDate: Date,
+  toDate: Date,
+  timetable: Timetable,
+): Record<string, number> {
+  const counts: Record<string, number> = {};
+  const current = new Date(fromDate);
+  current.setHours(0, 0, 0, 0);
+  current.setDate(current.getDate() + 1); // day after fromDate
+  const end = new Date(toDate);
+  end.setHours(0, 0, 0, 0); // up to but not including toDate
+
+  while (current < end) {
+    const jsDay = current.getDay();
+    if (jsDay !== 0) { // skip Sundays
+      const timetableDayIndex = jsDay - 1;
+      const codes = timetable[timetableDayIndex] ?? [];
+      for (const code of codes) {
+        counts[code] = (counts[code] || 0) + 1;
+      }
+    }
+    current.setDate(current.getDate() + 1);
+  }
+  return counts;
+}
+
+/**
  * Calculate attendance impact of a vacation range.
+ * Assumes the student attends all classes between today and the vacation start.
  */
 export function calculateVacationImpact(
   vacationDays: VacationDay[],
@@ -101,6 +133,15 @@ export function calculateVacationImpact(
       codeCount[code] = (codeCount[code] || 0) + 1;
     }
   }
+
+  // Count classes the student will attend between today and vacation start.
+  // This gives a more accurate baseline than using current attendance as-is.
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const vacationStart = vacationDays.length > 0 ? vacationDays[0].date : today;
+  const preVacationClasses = vacationStart > today
+    ? countClassesBetween(today, vacationStart, timetable)
+    : {};
 
   const impacts: SubjectImpact[] = [];
 
@@ -127,11 +168,16 @@ export function calculateVacationImpact(
       continue;
     }
 
-    const currentPct = (subject.attended / subject.total) * 100;
-    const projectedPct = (subject.attended / (subject.total + count)) * 100;
+    // Adjust baseline: assume student attends all classes before vacation
+    const preClasses = preVacationClasses[code] || 0;
+    const adjustedAttended = subject.attended + preClasses;
+    const adjustedTotal = subject.total + preClasses;
+
+    const currentPct = (adjustedAttended / adjustedTotal) * 100;
+    const projectedPct = (adjustedAttended / (adjustedTotal + count)) * 100;
     const drop = currentPct - projectedPct;
-    const currentBunkable = calculateClassesToBunk(subject.attended, subject.total, threshold);
-    const projectedBunkable = calculateClassesToBunk(subject.attended, subject.total + count, threshold);
+    const currentBunkable = calculateClassesToBunk(adjustedAttended, adjustedTotal, threshold);
+    const projectedBunkable = calculateClassesToBunk(adjustedAttended, adjustedTotal + count, threshold);
     const breachesThreshold = projectedPct < threshold;
 
     impacts.push({
