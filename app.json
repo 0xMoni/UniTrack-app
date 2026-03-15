@@ -47,7 +47,8 @@
           }
         }
       ],
-      "expo-image-picker"
+      "expo-image-picker",
+      "expo-font"
     ],
     "owner": "monii07",
     "extra": {
