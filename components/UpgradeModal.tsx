@@ -40,7 +40,38 @@ const FEATURES: FeatureRow[] = [
   { label: 'Monthly refreshes', free: true, freeNote: '3/month', premium: true },
   { label: 'Per-subject thresholds', free: false, premium: true },
   { label: 'Timetable scan & setup', free: false, premium: true },
+  { label: "Today's classes & skip advice", free: false, premium: true },
+  { label: 'Vacation planner', free: false, premium: true },
   { label: 'Unlimited refreshes', free: false, premium: true },
+];
+
+interface BenefitItem {
+  icon: keyof typeof Ionicons.glyphMap;
+  title: string;
+  desc: string;
+}
+
+const BENEFITS: BenefitItem[] = [
+  {
+    icon: 'checkmark-circle',
+    title: 'Know which classes to skip',
+    desc: 'Get a daily verdict — safe to skip, risky, or must attend — for every class.',
+  },
+  {
+    icon: 'airplane',
+    title: 'Plan vacations without fear',
+    desc: 'Simulate time off and see exactly how it impacts each subject before you go.',
+  },
+  {
+    icon: 'refresh',
+    title: 'Unlimited refreshes',
+    desc: 'Free users get 3/month. Your attendance changes daily — stay updated.',
+  },
+  {
+    icon: 'options',
+    title: 'Per-subject thresholds',
+    desc: 'Some subjects need 85%, others 75%. Set custom minimums for accurate alerts.',
+  },
 ];
 
 export default function UpgradeModal({
@@ -132,9 +163,14 @@ export default function UpgradeModal({
           >
             {/* Header */}
             <View style={styles.header}>
-              <Text style={[styles.headerTitle, { color: colors.text }]}>
-                Upgrade to Premium
-              </Text>
+              <View>
+                <Text style={[styles.headerTitle, { color: colors.text }]}>
+                  Skip smarter, not harder
+                </Text>
+                <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>
+                  One wrong skip could drop you below {'\n'}the threshold. Pro makes sure that never happens.
+                </Text>
+              </View>
               <TouchableOpacity
                 onPress={onClose}
                 style={[
@@ -154,6 +190,21 @@ export default function UpgradeModal({
                   color={colors.textSecondary}
                 />
               </TouchableOpacity>
+            </View>
+
+            {/* Benefits */}
+            <View style={styles.benefitsContainer}>
+              {BENEFITS.map((b) => (
+                <View key={b.title} style={styles.benefitRow}>
+                  <View style={[styles.benefitIcon, { backgroundColor: dark ? 'rgba(165, 180, 252, 0.15)' : 'rgba(99, 102, 241, 0.1)' }]}>
+                    <Ionicons name={b.icon} size={18} color={colors.accent} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.benefitTitle, { color: colors.text }]}>{b.title}</Text>
+                    <Text style={[styles.benefitDesc, { color: colors.textSecondary }]}>{b.desc}</Text>
+                  </View>
+                </View>
+              ))}
             </View>
 
             {/* Status banner */}
@@ -309,7 +360,10 @@ export default function UpgradeModal({
               {loading ? (
                 <ActivityIndicator size="small" color="#ffffff" />
               ) : (
-                <Text style={styles.payButtonText}>{buttonLabel}</Text>
+                <View style={styles.payButtonContent}>
+                  <Text style={styles.payButtonText}>{buttonLabel}</Text>
+                  <Text style={styles.payButtonSub}>Less than ₹1/day</Text>
+                </View>
               )}
             </TouchableOpacity>
 
@@ -317,7 +371,7 @@ export default function UpgradeModal({
             <Text
               style={[styles.footerNote, { color: colors.textTertiary }]}
             >
-              One-time payment for 30 days. No auto-renewal.
+              One-time payment for 30 days. No auto-renewal.{'\n'}Cheaper than the cost of getting detained.
             </Text>
           </ScrollView>
         </View>
@@ -355,6 +409,11 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '700',
   },
+  headerSubtitle: {
+    fontSize: 13,
+    marginTop: 4,
+    lineHeight: 18,
+  },
   closeButton: {
     width: 32,
     height: 32,
@@ -389,6 +448,34 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     flex: 1,
+  },
+
+  /* Benefits */
+  benefitsContainer: {
+    gap: 14,
+    marginBottom: 20,
+  },
+  benefitRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+  },
+  benefitIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 2,
+  },
+  benefitTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  benefitDesc: {
+    fontSize: 12,
+    lineHeight: 17,
+    marginTop: 2,
   },
 
   /* Plans */
@@ -477,10 +564,19 @@ const styles = StyleSheet.create({
     minHeight: 48,
     marginBottom: 12,
   },
+  payButtonContent: {
+    alignItems: 'center',
+  },
   payButtonText: {
     color: '#ffffff',
     fontSize: 16,
     fontWeight: '700',
+  },
+  payButtonSub: {
+    color: 'rgba(255, 255, 255, 0.7)',
+    fontSize: 11,
+    fontWeight: '500',
+    marginTop: 2,
   },
 
   /* Footer */

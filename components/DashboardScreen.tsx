@@ -104,7 +104,12 @@ export default function DashboardScreen({
 
       {/* Today's Classes / Timetable Setup prompt */}
       {hasTimetable ? (
-        <PremiumGate isPremium={premiumStatus.isPaidPremium} onUpgradePress={onUpgradeModalOpen}>
+        <PremiumGate
+          isPremium={premiumStatus.isPaidPremium}
+          onUpgradePress={onUpgradeModalOpen}
+          label="See which classes to skip"
+          subtitle="Pro tells you exactly when it's safe to bunk"
+        >
           <TodayCard
             timetable={timetable}
             subjectMap={subjectMap}
@@ -139,14 +144,30 @@ export default function DashboardScreen({
           </View>
           <View style={{ flex: 1 }}>
             <Text style={[styles.timetableTitle, { color: colors.text }]}>Set up your timetable</Text>
-            <Text style={[styles.timetableSub, { color: colors.textTertiary }]}>See which classes you can skip today</Text>
+            <Text style={[styles.timetableSub, { color: colors.textTertiary }]}>Know exactly which classes you can skip</Text>
           </View>
           {!premiumStatus.isPaidPremium && (
             <View style={styles.proBadge}>
-              <Ionicons name="lock-closed" size={10} color="#ffffff" />
+              <Ionicons name="sparkles" size={10} color="#ffffff" />
               <Text style={styles.proBadgeText}>PRO</Text>
             </View>
           )}
+        </TouchableOpacity>
+      )}
+
+      {/* Contextual upgrade nudge for free users with risky/low subjects */}
+      {!premiumStatus.isPaidPremium && statusCounts.low > 0 && (
+        <TouchableOpacity
+          onPress={onUpgradeModalOpen}
+          style={[styles.nudgeBanner, { backgroundColor: dark ? 'rgba(248, 113, 113, 0.12)' : 'rgba(239, 68, 68, 0.08)', borderColor: dark ? 'rgba(248, 113, 113, 0.25)' : 'rgba(239, 68, 68, 0.15)' }]}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="warning" size={16} color={dark ? '#f87171' : '#ef4444'} />
+          <Text style={[styles.nudgeText, { color: dark ? '#fca5a5' : '#dc2626' }]}>
+            {statusCounts.low === 1
+              ? `1 subject is below ${threshold}%. One wrong skip could mean detention.`
+              : `${statusCounts.low} subjects below ${threshold}%. Pro shows you exactly which classes to never miss.`}
+          </Text>
         </TouchableOpacity>
       )}
 
@@ -295,6 +316,21 @@ const styles = StyleSheet.create({
   customBadgeText: {
     fontSize: 11,
     fontWeight: '500',
+  },
+  nudgeBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  nudgeText: {
+    fontSize: 13,
+    fontWeight: '500',
+    flex: 1,
+    lineHeight: 18,
   },
   emptyState: {
     alignItems: 'center',

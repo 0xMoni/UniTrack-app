@@ -7,9 +7,19 @@ interface PremiumGateProps {
   isPremium: boolean;
   onUpgradePress: () => void;
   children: ReactNode;
+  /** Short benefit-driven label shown on the CTA */
+  label?: string;
+  /** Subtitle shown below the CTA */
+  subtitle?: string;
 }
 
-export default function PremiumGate({ isPremium, onUpgradePress, children }: PremiumGateProps) {
+export default function PremiumGate({
+  isPremium,
+  onUpgradePress,
+  children,
+  label = 'Unlock with Pro',
+  subtitle,
+}: PremiumGateProps) {
   const { dark } = useThemeContext();
 
   if (isPremium) return <>{children}</>;
@@ -27,9 +37,12 @@ export default function PremiumGate({ isPremium, onUpgradePress, children }: Pre
           accessibilityRole="button"
           accessibilityLabel="Upgrade to unlock features"
         >
-          <Ionicons name="lock-closed" size={16} color={dark ? '#a5b4fc' : '#6366f1'} />
-          <Text style={[styles.buttonText, { color: dark ? '#f1f5f9' : '#0f172a' }]}>Upgrade to unlock</Text>
+          <Ionicons name="sparkles" size={16} color={dark ? '#a5b4fc' : '#6366f1'} />
+          <Text style={[styles.buttonText, { color: dark ? '#f1f5f9' : '#0f172a' }]}>{label}</Text>
         </TouchableOpacity>
+        {subtitle ? (
+          <Text style={[styles.subtitle, { color: dark ? '#94a3b8' : '#64748b' }]}>{subtitle}</Text>
+        ) : null}
       </View>
     </View>
   );
@@ -40,7 +53,7 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   blurredContent: {
-    opacity: 0.3,
+    opacity: 0.35,
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
@@ -52,7 +65,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
     paddingVertical: 12,
     borderRadius: 12,
     shadowColor: '#000',
@@ -64,5 +77,10 @@ const styles = StyleSheet.create({
   buttonText: {
     fontSize: 14,
     fontWeight: '600',
+  },
+  subtitle: {
+    fontSize: 12,
+    marginTop: 8,
+    textAlign: 'center',
   },
 });

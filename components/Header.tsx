@@ -61,7 +61,7 @@ export default function Header({
   const menuItems: MenuItem[] = [
     ...(premiumStatus.isPaidPremium
       ? []
-      : [{ icon: 'diamond-outline' as const, label: 'Upgrade to Pro', onPress: onUpgradePress }]),
+      : [{ icon: 'sparkles' as const, label: 'Upgrade to Pro', onPress: onUpgradePress }]),
     { icon: dark ? 'sunny' : 'moon' as keyof typeof Ionicons.glyphMap, label: dark ? 'Light Mode' : 'Dark Mode', onPress: toggle },
     { icon: 'calendar-outline' as const, label: 'Timetable', onPress: onTimetablePress },
     { icon: 'settings-outline' as const, label: 'Settings', onPress: onSettingsPress },
