@@ -90,6 +90,11 @@ export default function UpgradeModal({
   const { isPaidPremium, isTrialActive, premiumDaysLeft, trialDaysLeft } =
     premiumStatus;
 
+  // Clear stale error every time modal opens
+  React.useEffect(() => {
+    if (isOpen) setError('');
+  }, [isOpen]);
+
   const handlePay = async () => {
     setError('');
     setLoading(true);
@@ -141,7 +146,7 @@ export default function UpgradeModal({
     }
   };
 
-  const buttonLabel = isPaidPremium ? 'Renew \u2014 Rs 29' : 'Pay Rs 29';
+  const buttonLabel = isPaidPremium ? 'Renew \u2014 Rs 19' : 'Pay Rs 19';
 
   return (
     <Modal
@@ -300,7 +305,7 @@ export default function UpgradeModal({
                   Premium
                 </Text>
                 <Text style={[styles.planPrice, { color: colors.accent }]}>
-                  Rs 29
+                  Rs 19
                   <Text
                     style={[
                       styles.planPricePeriod,
@@ -396,6 +401,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 24,
+    paddingBottom: 40,
   },
 
   /* Header */
