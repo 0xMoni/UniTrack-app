@@ -23,7 +23,7 @@ Track your university attendance from any ERP portal. Know which classes you can
 - **Framework** — React Native with Expo 54
 - **Language** — TypeScript
 - **Auth & Database** — Firebase Authentication + Cloud Firestore
-- **Payments** — Razorpay (Rs 29/month premium)
+- **Payments** — Razorpay (Rs 19/month premium)
 - **Crypto** — react-native-quick-crypto (AES-GCM encryption)
 - **Image Parsing** — AI-powered timetable extraction from photos
 
