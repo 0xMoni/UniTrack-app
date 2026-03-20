@@ -82,6 +82,7 @@ export default function TimetableSetup({
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: 'images',
       base64: false,
+      quality: 0.7,
     });
 
     if (result.canceled || !result.assets || result.assets.length === 0) {
@@ -114,8 +115,9 @@ export default function TimetableSetup({
       } else {
         setParseError(response.error || 'Could not parse timetable from image');
       }
-    } catch {
-      setParseError('Something went wrong while analyzing the image');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Unknown error';
+      setParseError(`Failed to analyze image: ${msg}`);
     } finally {
       setParsing(false);
     }

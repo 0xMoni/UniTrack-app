@@ -27,22 +27,12 @@ interface UpgradeModalProps {
   onPaymentSuccess: (premiumUntil: string, payment: PaymentRecord) => Promise<void>;
 }
 
-interface FeatureRow {
-  label: string;
-  free: boolean;
-  freeNote?: string;
-  premium: boolean;
-}
-
-const FEATURES: FeatureRow[] = [
-  { label: 'Dashboard & analytics', free: true, premium: true },
-  { label: 'Global threshold', free: true, premium: true },
-  { label: 'Monthly refreshes', free: true, freeNote: '3/month', premium: true },
-  { label: 'Per-subject thresholds', free: false, premium: true },
-  { label: 'Timetable scan & setup', free: false, premium: true },
-  { label: "Today's classes & skip advice", free: false, premium: true },
-  { label: 'Vacation planner', free: false, premium: true },
-  { label: 'Unlimited refreshes', free: false, premium: true },
+const PREMIUM_FEATURES = [
+  'Unlimited refreshes',
+  'Per-subject thresholds',
+  'Timetable scan & setup',
+  "Today's skip advice",
+  'Vacation planner',
 ];
 
 interface BenefitItem {
@@ -55,22 +45,22 @@ const BENEFITS: BenefitItem[] = [
   {
     icon: 'checkmark-circle',
     title: 'Know which classes to skip',
-    desc: 'Get a daily verdict — safe to skip, risky, or must attend — for every class.',
+    desc: 'Daily verdict — safe, risky, or must attend.',
   },
   {
     icon: 'airplane',
     title: 'Plan vacations without fear',
-    desc: 'Simulate time off and see exactly how it impacts each subject before you go.',
+    desc: 'See exactly how time off impacts each subject.',
   },
   {
     icon: 'refresh',
     title: 'Unlimited refreshes',
-    desc: 'Free users get 3/month. Your attendance changes daily — stay updated.',
+    desc: 'Free users get 3/month. Stay updated daily.',
   },
   {
     icon: 'options',
     title: 'Per-subject thresholds',
-    desc: 'Some subjects need 85%, others 75%. Set custom minimums for accurate alerts.',
+    desc: 'Set custom minimums — 85% for some, 50% for others.',
   },
 ];
 
@@ -100,7 +90,6 @@ export default function UpgradeModal({
     setLoading(true);
 
     try {
-      // Step 1: Create order
       const orderResult = await createPaymentOrder(uid, email);
       if (!orderResult.ok) {
         setError(orderResult.error || 'Failed to create payment order');
@@ -108,7 +97,6 @@ export default function UpgradeModal({
         return;
       }
 
-      // Step 2: Open Razorpay checkout
       const razorpayResponse = await openRazorpayCheckout({
         orderId: orderResult.orderId!,
         amount: orderResult.amount!,
@@ -116,7 +104,6 @@ export default function UpgradeModal({
         email,
       });
 
-      // Step 3: Verify payment
       const verifyResult = await verifyPayment(
         razorpayResponse.razorpay_order_id,
         razorpayResponse.razorpay_payment_id,
@@ -131,7 +118,6 @@ export default function UpgradeModal({
         return;
       }
 
-      // Step 4: Persist payment before closing modal
       await onPaymentSuccess(
         verifyResult.premiumUntil!,
         verifyResult.payment as PaymentRecord,
@@ -162,18 +148,20 @@ export default function UpgradeModal({
             { backgroundColor: colors.background },
           ]}
         >
+          {/* Scrollable content */}
           <ScrollView
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.scrollContent}
+            bounces
           >
             {/* Header */}
             <View style={styles.header}>
-              <View>
+              <View style={{ flex: 1 }}>
                 <Text style={[styles.headerTitle, { color: colors.text }]}>
                   Skip smarter, not harder
                 </Text>
                 <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>
-                  One wrong skip could drop you below {'\n'}the threshold. Pro makes sure that never happens.
+                  Pro makes sure you never accidentally drop below threshold.
                 </Text>
               </View>
               <TouchableOpacity
@@ -189,20 +177,33 @@ export default function UpgradeModal({
                 accessibilityLabel="Close"
                 accessibilityRole="button"
               >
-                <Ionicons
-                  name="close"
-                  size={18}
-                  color={colors.textSecondary}
-                />
+                <Ionicons name="close" size={18} color={colors.textSecondary} />
               </TouchableOpacity>
             </View>
+
+            {/* Status banner */}
+            {isPaidPremium ? (
+              <View style={[styles.statusBanner, { backgroundColor: dark ? 'rgba(165, 180, 252, 0.15)' : 'rgba(99, 102, 241, 0.1)' }]}>
+                <Ionicons name="shield-checkmark" size={16} color={colors.accent} />
+                <Text style={[styles.statusBannerText, { color: colors.accent }]}>
+                  Premium active — {premiumDaysLeft} {premiumDaysLeft === 1 ? 'day' : 'days'} remaining
+                </Text>
+              </View>
+            ) : isTrialActive ? (
+              <View style={[styles.statusBanner, { backgroundColor: dark ? 'rgba(251, 191, 36, 0.15)' : 'rgba(245, 158, 11, 0.1)' }]}>
+                <Ionicons name="time" size={16} color={dark ? '#fbbf24' : '#d97706'} />
+                <Text style={[styles.statusBannerText, { color: dark ? '#fbbf24' : '#d97706' }]}>
+                  Free trial — {trialDaysLeft} {trialDaysLeft === 1 ? 'day' : 'days'} left
+                </Text>
+              </View>
+            ) : null}
 
             {/* Benefits */}
             <View style={styles.benefitsContainer}>
               {BENEFITS.map((b) => (
                 <View key={b.title} style={styles.benefitRow}>
                   <View style={[styles.benefitIcon, { backgroundColor: dark ? 'rgba(165, 180, 252, 0.15)' : 'rgba(99, 102, 241, 0.1)' }]}>
-                    <Ionicons name={b.icon} size={18} color={colors.accent} />
+                    <Ionicons name={b.icon} size={16} color={colors.accent} />
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text style={[styles.benefitTitle, { color: colors.text }]}>{b.title}</Text>
@@ -212,146 +213,34 @@ export default function UpgradeModal({
               ))}
             </View>
 
-            {/* Status banner */}
-            {isPaidPremium ? (
-              <View style={[styles.statusBanner, styles.statusBannerIndigo, { backgroundColor: dark ? 'rgba(165, 180, 252, 0.15)' : 'rgba(99, 102, 241, 0.1)' }]}>
-                <Ionicons
-                  name="shield-checkmark"
-                  size={18}
-                  color={colors.accent}
-                />
-                <Text style={[styles.statusBannerIndigoText, { color: colors.accent }]}>
-                  Premium active \u2014 {premiumDaysLeft}{' '}
-                  {premiumDaysLeft === 1 ? 'day' : 'days'} remaining
+            {/* What you get — compact list instead of two huge cards */}
+            <View style={[styles.premiumCard, { backgroundColor: dark ? 'rgba(165, 180, 252, 0.08)' : 'rgba(99, 102, 241, 0.04)', borderColor: dark ? 'rgba(165, 180, 252, 0.25)' : 'rgba(99, 102, 241, 0.2)' }]}>
+              <View style={styles.premiumCardHeader}>
+                <Text style={[styles.premiumCardTitle, { color: colors.text }]}>Premium</Text>
+                <Text style={[styles.premiumCardPrice, { color: colors.accent }]}>
+                  Rs 19<Text style={[styles.premiumCardPeriod, { color: colors.textTertiary }]}>/mo</Text>
                 </Text>
               </View>
-            ) : isTrialActive && !isPaidPremium ? (
-              <View style={[styles.statusBanner, styles.statusBannerAmber, { backgroundColor: dark ? 'rgba(251, 191, 36, 0.15)' : 'rgba(245, 158, 11, 0.1)' }]}>
-                <Ionicons name="time" size={18} color={dark ? '#fbbf24' : '#d97706'} />
-                <Text style={[styles.statusBannerAmberText, { color: dark ? '#fbbf24' : '#d97706' }]}>
-                  Free trial \u2014 {trialDaysLeft}{' '}
-                  {trialDaysLeft === 1 ? 'day' : 'days'} left {'\u2022'} Unlimited refreshes
-                </Text>
-              </View>
-            ) : null}
-
-            {/* Plan comparison */}
-            <View style={styles.plansContainer}>
-              {/* Free plan */}
-              <View
-                style={[
-                  styles.planCard,
-                  {
-                    backgroundColor: colors.card,
-                    borderColor: colors.cardBorder,
-                  },
-                ]}
-              >
-                <Text style={[styles.planName, { color: colors.text }]}>
-                  Free
-                </Text>
-                <Text
-                  style={[styles.planPrice, { color: colors.textSecondary }]}
-                >
-                  Rs 0
-                </Text>
-                <View style={[styles.planDivider, { backgroundColor: colors.divider }]} />
-                {FEATURES.map((f) => (
-                  <View key={f.label} style={styles.featureRow}>
-                    <Ionicons
-                      name={f.free ? 'checkmark-circle' : 'close-circle'}
-                      size={18}
-                      color={f.free ? (dark ? '#34d399' : '#10b981') : colors.textTertiary}
-                    />
-                    <Text
-                      style={[
-                        styles.featureLabel,
-                        {
-                          color: f.free ? colors.text : colors.textTertiary,
-                        },
-                      ]}
-                      numberOfLines={2}
-                    >
-                      {f.label}
-                      {f.free && f.freeNote ? (
-                        <Text style={styles.featureNote}>
-                          {' '}({f.freeNote})
-                        </Text>
-                      ) : null}
-                    </Text>
+              <View style={styles.premiumFeatureList}>
+                {PREMIUM_FEATURES.map((f) => (
+                  <View key={f} style={styles.premiumFeatureRow}>
+                    <Ionicons name="checkmark-circle" size={16} color={dark ? '#34d399' : '#10b981'} />
+                    <Text style={[styles.premiumFeatureText, { color: colors.text }]}>{f}</Text>
                   </View>
                 ))}
               </View>
-
-              {/* Premium plan */}
-              <View
-                style={[
-                  styles.planCard,
-                  styles.premiumPlanCard,
-                  {
-                    backgroundColor: dark
-                      ? 'rgba(165, 180, 252, 0.1)'
-                      : 'rgba(99, 102, 241, 0.04)',
-                    borderColor: dark
-                      ? 'rgba(165, 180, 252, 0.35)'
-                      : 'rgba(99, 102, 241, 0.3)',
-                  },
-                ]}
-              >
-                <View style={styles.bestValueBadge}>
-                  <Text style={styles.bestValueText}>Best value</Text>
-                </View>
-                <Text style={[styles.planName, { color: colors.text }]}>
-                  Premium
-                </Text>
-                <Text style={[styles.planPrice, { color: colors.accent }]}>
-                  Rs 19
-                  <Text
-                    style={[
-                      styles.planPricePeriod,
-                      { color: colors.textTertiary },
-                    ]}
-                  >
-                    /mo
-                  </Text>
-                </Text>
-                <View
-                  style={[
-                    styles.planDivider,
-                    { backgroundColor: dark ? 'rgba(165, 180, 252, 0.2)' : 'rgba(99, 102, 241, 0.15)' },
-                  ]}
-                />
-                {FEATURES.map((f) => (
-                  <View key={f.label} style={styles.featureRow}>
-                    <Ionicons
-                      name="checkmark-circle"
-                      size={18}
-                      color={dark ? '#34d399' : '#10b981'}
-                    />
-                    <Text
-                      style={[styles.featureLabel, { color: colors.text }]}
-                      numberOfLines={2}
-                    >
-                      {f.label}
-                      {f.label === 'Monthly refreshes' ? (
-                        <Text style={[styles.featureNote, { color: colors.accent }]}>
-                          {' '}(unlimited)
-                        </Text>
-                      ) : null}
-                    </Text>
-                  </View>
-                ))}
-              </View>
+              <Text style={[styles.freeNote, { color: colors.textTertiary }]}>
+                Free plan includes dashboard, global threshold, and 3 refreshes/month
+              </Text>
             </View>
+          </ScrollView>
 
-            {/* Error display */}
+          {/* Fixed bottom — always visible */}
+          <View style={[styles.bottomBar, { borderTopColor: colors.divider, backgroundColor: colors.background }]}>
             {error ? (
-              <View style={styles.errorContainer}>
-                <Text style={styles.errorText}>{error}</Text>
-              </View>
+              <Text style={styles.errorText} numberOfLines={2}>{error}</Text>
             ) : null}
 
-            {/* Pay button */}
             <TouchableOpacity
               onPress={handlePay}
               disabled={loading}
@@ -367,18 +256,11 @@ export default function UpgradeModal({
               ) : (
                 <View style={styles.payButtonContent}>
                   <Text style={styles.payButtonText}>{buttonLabel}</Text>
-                  <Text style={styles.payButtonSub}>Less than ₹1/day</Text>
+                  <Text style={styles.payButtonSub}>30 days · No auto-renewal · Less than Rs 1/day</Text>
                 </View>
               )}
             </TouchableOpacity>
-
-            {/* Footer note */}
-            <Text
-              style={[styles.footerNote, { color: colors.textTertiary }]}
-            >
-              One-time payment for 30 days. No auto-renewal.{'\n'}Cheaper than the cost of getting detained.
-            </Text>
-          </ScrollView>
+          </View>
         </View>
       </View>
     </Modal>
@@ -389,27 +271,26 @@ const styles = StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 20,
+    justifyContent: 'flex-end',
   },
   modal: {
-    width: '100%',
-    maxHeight: '90%',
-    borderRadius: 20,
+    maxHeight: '88%',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
     overflow: 'hidden',
   },
   scrollContent: {
-    padding: 24,
-    paddingBottom: 40,
+    padding: 20,
+    paddingBottom: 8,
   },
 
   /* Header */
   header: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     justifyContent: 'space-between',
     marginBottom: 16,
+    gap: 12,
   },
   headerTitle: {
     fontSize: 20,
@@ -426,169 +307,127 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
+    flexShrink: 0,
   },
 
   /* Status banners */
   statusBanner: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    borderRadius: 12,
-    marginBottom: 20,
+    gap: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 10,
+    marginBottom: 16,
   },
-  statusBannerIndigo: {
-    // overridden inline for dark mode
-  },
-  statusBannerIndigoText: {
-    fontSize: 14,
-    fontWeight: '600',
-    flex: 1,
-  },
-  statusBannerAmber: {
-    // overridden inline for dark mode
-  },
-  statusBannerAmberText: {
-    // color set inline for dark mode
-    fontSize: 14,
+  statusBannerText: {
+    fontSize: 13,
     fontWeight: '600',
     flex: 1,
   },
 
   /* Benefits */
   benefitsContainer: {
-    gap: 14,
-    marginBottom: 20,
+    gap: 12,
+    marginBottom: 16,
   },
   benefitRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: 12,
+    gap: 10,
   },
   benefitIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
+    width: 32,
+    height: 32,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 2,
+    marginTop: 1,
   },
   benefitTitle: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
   },
   benefitDesc: {
     fontSize: 12,
-    lineHeight: 17,
-    marginTop: 2,
+    lineHeight: 16,
+    marginTop: 1,
   },
 
-  /* Plans */
-  plansContainer: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 20,
-  },
-  planCard: {
-    flex: 1,
+  /* Premium card (replaces two-column comparison) */
+  premiumCard: {
     borderRadius: 14,
     borderWidth: 1,
-    padding: 14,
+    padding: 16,
   },
-  premiumPlanCard: {
-    position: 'relative',
+  premiumCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    justifyContent: 'space-between',
+    marginBottom: 12,
   },
-  bestValueBadge: {
-    position: 'absolute',
-    top: -1,
-    right: -1,
-    backgroundColor: INDIGO,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderBottomLeftRadius: 8,
-    borderTopRightRadius: 13,
-  },
-  bestValueText: {
-    color: '#ffffff',
-    fontSize: 10,
+  premiumCardTitle: {
+    fontSize: 16,
     fontWeight: '700',
-    letterSpacing: 0.3,
   },
-  planName: {
-    fontSize: 15,
-    fontWeight: '700',
-    marginBottom: 2,
-  },
-  planPrice: {
+  premiumCardPrice: {
     fontSize: 20,
-    fontWeight: '700',
+    fontWeight: '800',
   },
-  planPricePeriod: {
+  premiumCardPeriod: {
     fontSize: 13,
     fontWeight: '500',
   },
-  planDivider: {
-    height: 1,
-    marginVertical: 10,
-  },
-  featureRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
+  premiumFeatureList: {
     gap: 8,
-    marginVertical: 4,
   },
-  featureLabel: {
-    fontSize: 12,
-    lineHeight: 18,
-    flex: 1,
+  premiumFeatureRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
-  featureNote: {
-    fontSize: 11,
+  premiumFeatureText: {
+    fontSize: 13,
     fontWeight: '500',
   },
+  freeNote: {
+    fontSize: 11,
+    marginTop: 12,
+    lineHeight: 16,
+  },
 
-  /* Error */
-  errorContainer: {
-    backgroundColor: 'rgba(239, 68, 68, 0.1)',
-    borderRadius: 10,
-    padding: 12,
-    marginBottom: 16,
+  /* Fixed bottom bar */
+  bottomBar: {
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 32,
+    borderTopWidth: 1,
   },
   errorText: {
     color: '#ef4444',
-    fontSize: 14,
+    fontSize: 13,
     textAlign: 'center',
+    marginBottom: 8,
   },
-
-  /* Pay button */
   payButton: {
-    borderRadius: 12,
+    borderRadius: 14,
     paddingVertical: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 48,
-    marginBottom: 12,
+    minHeight: 52,
   },
   payButtonContent: {
     alignItems: 'center',
   },
   payButtonText: {
     color: '#ffffff',
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '700',
   },
   payButtonSub: {
-    color: 'rgba(255, 255, 255, 0.7)',
+    color: 'rgba(255, 255, 255, 0.6)',
     fontSize: 11,
     fontWeight: '500',
     marginTop: 2,
-  },
-
-  /* Footer */
-  footerNote: {
-    fontSize: 12,
-    textAlign: 'center',
-    lineHeight: 18,
   },
 });
