@@ -194,6 +194,24 @@ export default function DashboardScreen({
         )}
       </View>
 
+      {/* Custom thresholds nudge for free users */}
+      {!premiumStatus.isPaidPremium && (
+        <TouchableOpacity
+          onPress={onUpgradeModalOpen}
+          style={[styles.thresholdNudge, { backgroundColor: dark ? 'rgba(165, 180, 252, 0.1)' : 'rgba(99, 102, 241, 0.06)', borderColor: dark ? 'rgba(165, 180, 252, 0.25)' : 'rgba(99, 102, 241, 0.15)' }]}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="options-outline" size={16} color={colors.accent} />
+          <Text style={[styles.thresholdNudgeText, { color: colors.accent }]}>
+            Some subjects need 85%, others 50%. Set per-subject thresholds.
+          </Text>
+          <View style={styles.proBadge}>
+            <Ionicons name="sparkles" size={10} color="#ffffff" />
+            <Text style={styles.proBadgeText}>PRO</Text>
+          </View>
+        </TouchableOpacity>
+      )}
+
       {/* Status Filter */}
       <StatusFilter
         activeFilter={activeFilter}
@@ -227,8 +245,13 @@ export default function DashboardScreen({
         </View>
       )}
 
+      {/* Copyright */}
+      <Text style={[styles.copyright, { color: colors.textTertiary }]}>
+        © 2026 0xMoni
+      </Text>
+
       {/* Bottom spacing */}
-      <View style={{ height: 40 }} />
+      <View style={{ height: 24 }} />
     </ScrollView>
   );
 }
@@ -317,6 +340,21 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '500',
   },
+  thresholdNudge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+  },
+  thresholdNudgeText: {
+    fontSize: 12,
+    fontWeight: '500',
+    flex: 1,
+    lineHeight: 17,
+  },
   nudgeBanner: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -338,6 +376,11 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 14,
+    marginTop: 16,
+  },
+  copyright: {
+    fontSize: 11,
+    textAlign: 'center',
     marginTop: 16,
   },
 });

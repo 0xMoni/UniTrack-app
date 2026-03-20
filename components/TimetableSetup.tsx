@@ -8,7 +8,6 @@ import {
   Image,
   ActivityIndicator,
   StyleSheet,
-  SafeAreaView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
@@ -152,10 +151,12 @@ export default function TimetableSetup({
   return (
     <Modal
       visible={isOpen}
-      animationType="slide"
+      transparent
+      animationType="fade"
       onRequestClose={onClose}
     >
-      <SafeAreaView
+      <View style={styles.overlay}>
+      <View
         style={[
           styles.modal,
           { backgroundColor: colors.background },
@@ -163,12 +164,13 @@ export default function TimetableSetup({
       >
         {/* Header */}
         <View style={[styles.header, { borderBottomColor: colors.divider }]}>
-          <TouchableOpacity onPress={onClose} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-            <Ionicons name="close" size={24} color={colors.text} />
-          </TouchableOpacity>
-          <Text style={[styles.headerTitle, { color: colors.text, flex: 1, marginLeft: 12 }]}>
-            Weekly Timetable
-          </Text>
+          <View style={styles.headerTopRow}>
+            <TouchableOpacity onPress={onClose} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+              <Ionicons name="close" size={24} color={colors.text} />
+            </TouchableOpacity>
+            <Text style={[styles.headerTitle, { color: colors.text }]} numberOfLines={1}>
+              Weekly Timetable
+            </Text>
             <TouchableOpacity
               onPress={handleToggleMode}
               style={[
@@ -195,10 +197,11 @@ export default function TimetableSetup({
                   { color: showUpload ? colors.accent : colors.textSecondary },
                 ]}
               >
-                {showUpload ? 'Manual' : 'Scan image'}
+                {showUpload ? 'Manual' : 'Scan'}
               </Text>
             </TouchableOpacity>
           </View>
+        </View>
 
           {/* Body */}
           <View style={styles.body}>
@@ -461,14 +464,14 @@ export default function TimetableSetup({
           {/* Footer */}
           <View style={[styles.footer, { borderTopColor: colors.divider }]}>
             <Text style={[styles.footerCount, { color: colors.textTertiary }]}>
-              {totalConfigured} {totalConfigured === 1 ? 'class' : 'classes'}{' '}
-              configured
+              {totalConfigured} {totalConfigured === 1 ? 'class' : 'classes'} configured
             </Text>
             <View style={styles.footerButtons}>
               <TouchableOpacity
                 onPress={onClose}
                 style={[
                   styles.footerButton,
+                  styles.footerButtonFlex,
                   {
                     backgroundColor: dark
                       ? 'rgba(100, 116, 139, 0.2)'
@@ -491,6 +494,7 @@ export default function TimetableSetup({
                 onPress={handleSave}
                 style={[
                   styles.footerButton,
+                  styles.footerButtonFlex,
                   { backgroundColor: INDIGO },
                 ]}
                 accessibilityLabel="Save timetable"
@@ -502,36 +506,50 @@ export default function TimetableSetup({
               </TouchableOpacity>
             </View>
           </View>
-        </SafeAreaView>
+        </View>
+      </View>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 48,
+  },
   modal: {
     flex: 1,
+    borderRadius: 20,
+    overflow: 'hidden',
   },
 
   /* Header */
   header: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+  },
+  headerTopRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
+    gap: 12,
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: '700',
+    flex: 1,
   },
   modeToggle: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 7,
     borderRadius: 8,
+    flexShrink: 0,
   },
   modeToggleText: {
     fontSize: 13,
@@ -637,20 +655,20 @@ const styles = StyleSheet.create({
     flexGrow: 0,
   },
   dayTabsContent: {
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    gap: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    gap: 6,
   },
   dayTab: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     borderRadius: 8,
-    gap: 6,
+    gap: 5,
   },
   dayTabText: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
   },
   dayCountBadge: {
@@ -680,14 +698,14 @@ const styles = StyleSheet.create({
   subjectRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
     borderBottomWidth: 1,
-    gap: 14,
+    gap: 10,
   },
   checkbox: {
-    width: 22,
-    height: 22,
+    width: 20,
+    height: 20,
     borderRadius: 6,
     borderWidth: 2,
     alignItems: 'center',
@@ -695,41 +713,43 @@ const styles = StyleSheet.create({
   },
   subjectInfo: {
     flex: 1,
-    gap: 2,
+    gap: 1,
   },
   subjectName: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '500',
   },
   subjectCode: {
-    fontSize: 12,
+    fontSize: 11,
     fontFamily: 'monospace',
   },
 
   /* Footer */
   footer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     borderTopWidth: 1,
+    gap: 8,
   },
   footerCount: {
     fontSize: 13,
     fontWeight: '500',
+    textAlign: 'center',
   },
   footerButtons: {
     flexDirection: 'row',
     gap: 8,
   },
   footerButton: {
-    paddingHorizontal: 18,
+    paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 10,
     minHeight: 44,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  footerButtonFlex: {
+    flex: 1,
   },
   footerButtonText: {
     fontSize: 14,

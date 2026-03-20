@@ -348,6 +348,10 @@ export default function LoginScreen(props: Props) {
               Your credentials are encrypted and stored securely on your device. They are sent to our server only to fetch your attendance from the ERP.
             </Text>
           )}
+
+          <Text style={[styles.copyright, { color: colors.textTertiary }]}>
+            © 2026 0xMoni
+          </Text>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -492,5 +496,10 @@ const styles = StyleSheet.create({
     marginTop: 24,
     lineHeight: 18,
     paddingHorizontal: 16,
+  },
+  copyright: {
+    fontSize: 11,
+    textAlign: 'center',
+    marginTop: 20,
   },
 });
