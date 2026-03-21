@@ -97,10 +97,16 @@ export default function UpgradeModal({
         return;
       }
 
+      if (!orderResult.orderId || !orderResult.amount || !orderResult.currency) {
+        setError('Invalid order data from server');
+        setLoading(false);
+        return;
+      }
+
       const razorpayResponse = await openRazorpayCheckout({
-        orderId: orderResult.orderId!,
-        amount: orderResult.amount!,
-        currency: orderResult.currency!,
+        orderId: orderResult.orderId,
+        amount: orderResult.amount,
+        currency: orderResult.currency,
         email,
       });
 
@@ -118,8 +124,14 @@ export default function UpgradeModal({
         return;
       }
 
+      if (!verifyResult.premiumUntil || !verifyResult.payment) {
+        setError('Payment verified but server returned incomplete data');
+        setLoading(false);
+        return;
+      }
+
       await onPaymentSuccess(
-        verifyResult.premiumUntil!,
+        verifyResult.premiumUntil,
         verifyResult.payment as PaymentRecord,
       );
       onClose();

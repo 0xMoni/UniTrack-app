@@ -304,23 +304,6 @@ const styles = StyleSheet.create({
     minWidth: 180,
     zIndex: 100,
   },
-  themeHintArrow: {
-    position: 'absolute',
-    top: -6,
-    right: 12,
-    width: 12,
-    height: 6,
-    overflow: 'hidden',
-  },
-  themeHintArrowInner: {
-    position: 'absolute',
-    top: 3,
-    left: 0,
-    width: 10,
-    height: 10,
-    borderWidth: 1,
-    transform: [{ rotate: '45deg' }],
-  },
   themeHintText: {
     fontSize: 13,
     fontWeight: '600',

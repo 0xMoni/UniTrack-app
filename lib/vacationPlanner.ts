@@ -241,8 +241,10 @@ export function findBestVacationWindows(
       let penalty = 0;
       for (const impact of result.impacts) {
         if (impact.isNoData) continue;
+        const subject = subjectMap.get(impact.code);
+        if (!subject) continue;
         const threshold = getEffectiveThreshold(
-          subjectMap.get(impact.code)!, globalThreshold, subjectThresholds,
+          subject, globalThreshold, subjectThresholds,
         );
         const margin = impact.currentPct - threshold;
         let weight: number;
