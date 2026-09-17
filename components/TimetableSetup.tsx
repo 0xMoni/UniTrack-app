@@ -14,7 +14,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system/legacy';
 import { useThemeContext } from '../contexts/ThemeContext';
 import { Subject, Timetable } from '../lib/types';
-import { getSubjectKey } from '../lib/utils';
+import { getSubjectKey, sanitizeTimetable } from '../lib/utils';
 import { parseTimetableFromApi } from '../lib/api';
 
 const INDIGO = '#6366f1';
@@ -51,14 +51,14 @@ export default function TimetableSetup({
   // Reset state when modal opens
   useEffect(() => {
     if (isOpen) {
-      setDraft({ ...currentTimetable });
+      setDraft(sanitizeTimetable(currentTimetable, subjects));
       setActiveDay(0);
       setShowUpload(false);
       setParsing(false);
       setParseError('');
       setPreviewUri('');
     }
-  }, [isOpen, currentTimetable]);
+  }, [isOpen, currentTimetable, subjects]);
 
   const subjectCodes = subjects.map((s) => s.code || s.name);
 
@@ -110,7 +110,7 @@ export default function TimetableSetup({
       );
 
       if (response.success && response.timetable) {
-        setDraft(response.timetable);
+        setDraft(sanitizeTimetable(response.timetable, subjects));
         setShowUpload(false);
       } else {
         setParseError(response.error || 'Could not parse timetable from image');
@@ -138,7 +138,7 @@ export default function TimetableSetup({
   };
 
   const handleSave = () => {
-    onSave(draft);
+    onSave(sanitizeTimetable(draft, subjects));
     onClose();
   };
 
