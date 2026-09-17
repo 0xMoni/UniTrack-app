@@ -313,12 +313,7 @@ export default function TimetableSetup({
               /* Manual Mode */
               <View style={styles.manualContainer}>
                 {/* Day tabs */}
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.dayTabsContent}
-                  style={styles.dayTabsScroll}
-                >
+                <View style={styles.dayTabsRow}>
                   {DAY_NAMES.map((day, index) => {
                     const isActive = index === activeDay;
                     const dayCount = (draft[index] ?? []).length;
@@ -376,7 +371,7 @@ export default function TimetableSetup({
                       </TouchableOpacity>
                     );
                   })}
-                </ScrollView>
+                </View>
 
                 {/* Subject checklist */}
                 <ScrollView
@@ -561,7 +556,9 @@ const styles = StyleSheet.create({
   /* Body */
   body: {
     flex: 1,
-    minHeight: 300,
+    // No minHeight: with the modal at a fixed height, a floor here pushes the
+    // footer past the bottom edge (and overflow:hidden clips it) on short screens
+    minHeight: 0,
   },
 
   /* Upload mode */
@@ -653,33 +650,36 @@ const styles = StyleSheet.create({
   manualContainer: {
     flex: 1,
   },
-  dayTabsScroll: {
-    flexGrow: 0,
-  },
-  dayTabsContent: {
+  dayTabsRow: {
+    flexDirection: 'row',
     paddingHorizontal: 12,
     paddingVertical: 12,
-    gap: 6,
+    gap: 4,
   },
+  // Six equal columns that share the modal width. Stacking the count under the
+  // day name keeps each tab narrow enough that Fri/Sat cannot run off-screen.
   dayTab: {
-    flexDirection: 'row',
+    flex: 1,
+    minWidth: 0,
     alignItems: 'center',
-    paddingHorizontal: 12,
+    justifyContent: 'center',
+    paddingHorizontal: 2,
     paddingVertical: 6,
     borderRadius: 8,
-    gap: 5,
+    gap: 3,
+    minHeight: 52,
   },
   dayTabText: {
     fontSize: 13,
     fontWeight: '600',
   },
   dayCountBadge: {
-    minWidth: 20,
-    height: 20,
-    borderRadius: 10,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 6,
+    paddingHorizontal: 5,
   },
   dayCountText: {
     fontSize: 11,
