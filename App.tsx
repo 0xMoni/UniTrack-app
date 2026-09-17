@@ -17,6 +17,7 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { fetchAttendanceFromApi } from './lib/api';
 import { AttendanceData, StatusFilter as StatusFilterType, Timetable } from './lib/types';
+import { sanitizeTimetable } from './lib/utils';
 import LoadingScreen from './components/LoadingScreen';
 import LoginScreen from './components/LoginScreen';
 import Header from './components/Header';
@@ -103,7 +104,7 @@ function AppContent() {
         if (data.attendance) setAttendanceData(data.attendance);
         if (data.threshold != null) setThreshold(data.threshold);
         if (data.subjectThresholds) setSubjectThresholds(data.subjectThresholds);
-        if (data.timetable) setTimetable(data.timetable);
+        if (data.timetable) setTimetable(sanitizeTimetable(data.timetable, data.attendance?.subjects));
         if (data.erpUrl) setSavedErpUrl(data.erpUrl);
         if (data.premiumUntil != null) {
           setPremiumUntil(data.premiumUntil);
