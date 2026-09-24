@@ -141,6 +141,21 @@ function AppContent() {
     return () => { cancelled = true; };
   }, [user]);
 
+  // ── Re-check the timetable whenever the subject list changes ──
+  // sanitizeTimetable only ran against the subjects cached at load. A refresh
+  // can bring in a different semester's subjects, and the timetable saved
+  // against the old codes would otherwise linger as entries that match no
+  // subject — phantom dots on the week strip and a wipe on next save.
+  useEffect(() => {
+    const subjects = attendanceData?.subjects;
+    if (!subjects || subjects.length === 0) return;
+    setTimetable(prev => {
+      const next = sanitizeTimetable(prev, subjects);
+      // Returning prev unchanged avoids a redundant Firestore write
+      return JSON.stringify(next) === JSON.stringify(prev) ? prev : next;
+    });
+  }, [attendanceData]);
+
   // ── Save attendance to Firestore when it changes (skip initial load) ──
   useEffect(() => {
     if (!isInitialized || !user || !attendanceData) return;
