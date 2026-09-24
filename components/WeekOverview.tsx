@@ -66,10 +66,10 @@ export default function WeekOverview({
       const details: DayDetail[] = [];
       for (const code of codes) {
         const subject = subjectMap[code];
-        if (!subject) {
-          dots.push({ color: dark ? '#cbd5e1' : '#94a3b8' });
-          continue;
-        }
+        // A code with no matching subject (e.g. left over from another
+        // semester) contributes no detail row, so it must not draw a dot
+        // either — otherwise the strip shows more classes than the day lists
+        if (!subject) continue;
         const threshold = getEffectiveThreshold(subject, globalThreshold, subjectThresholds);
         const status = calculateStatus(subject.percentage, threshold, subject.total);
         const color = getStatusHexColor(status, dark);
@@ -81,6 +81,12 @@ export default function WeekOverview({
           status,
           color,
         });
+      }
+      if (dots.length === 0) {
+        return {
+          dots: [{ color: dark ? '#cbd5e1' : '#94a3b8' }],
+          details: [] as DayDetail[],
+        };
       }
       return { dots, details };
     });
